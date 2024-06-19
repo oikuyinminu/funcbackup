@@ -40,8 +40,8 @@ const processStorageAccountSnapshots = async (myTimer: Timer, context: Invocatio
     }
   }
 };
-
+ 
 app.timer('PerformBlobSnapShot', {
-  schedule: '*/15 * * * *', // Every Friday at midnight
+  schedule: '*/5 * * * *', // Every Friday at midnight
   handler: (myTimer: Timer, context: InvocationContext) => processStorageAccountSnapshots(myTimer, context),
 });
