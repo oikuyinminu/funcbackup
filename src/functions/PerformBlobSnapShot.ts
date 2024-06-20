@@ -1,7 +1,7 @@
 import { DefaultAzureCredential, ManagedIdentityCredential } from "@azure/identity";
 import { BlobServiceClient } from "@azure/storage-blob";
 import { app, InvocationContext, Timer } from "@azure/functions";
-import { getStorageAccounts } from "../services/StorageProcessor.js";
+import { getStorageAccounts } from "../services/StorageProcessor";
 
 const getBlobServiceClient = (storageAccountName: string, credential: ManagedIdentityCredential): BlobServiceClient => {
   return new BlobServiceClient(
