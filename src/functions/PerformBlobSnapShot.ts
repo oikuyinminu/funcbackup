@@ -9,6 +9,6 @@ export async function SetBlobSnapshot(myTimer: Timer, context: InvocationContext
 }
 
 app.timer('SetBlobSnapshot', {
-  schedule: '*/15 * * * *', // To be adjusted as needed
+  schedule: '*/5 * * * *', // To be adjusted as needed
   handler: SetBlobSnapshot,
 });
