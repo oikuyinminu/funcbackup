@@ -1,18 +1,56 @@
-import { DefaultAzureCredential } from "@azure/identity";
-import { SubscriptionClient } from "@azure/arm-subscriptions";
-import { StorageManagementClient } from "@azure/arm-storage";
+import { ManagedIdentityCredential } from "@azure/identity";
+import { BlobServiceClient } from "@azure/storage-blob";
+import { InvocationContext } from "@azure/functions";
+import * as settings from "./SettingsProvider";
 
-export const getStorageAccounts = async (): Promise<string[]> => {
-  const credential = new DefaultAzureCredential();
-  const subscriptionClient = new SubscriptionClient(credential);
-  const storageAccounts: string[] = [];
+const getBlobServiceClient = (storageAccountName: string, credential: ManagedIdentityCredential): BlobServiceClient => {
+  return new BlobServiceClient(
+    `https://${storageAccountName}.blob.core.windows.net`,
+    credential
+  );
+};
 
-  for await (const subscription of subscriptionClient.subscriptions.list()) {
-    const storageClient = new StorageManagementClient(credential, subscription.subscriptionId);
-    for await (const storageAccount of storageClient.storageAccounts.list()) {
-      storageAccounts.push(storageAccount.name);
+export const processStorageAccountSnapshots = async (context: InvocationContext): Promise<void> => {
+  const storageAccounts: string[] = [
+    settings.CONTENT_STORAGES,
+  ]
+    .filter(storage => storage !== "")
+    .map(storage => storage.trim().split(","))
+    .reduce((acc, val) => acc.concat(val), []);
+
+  const credential = new ManagedIdentityCredential();
+
+  for (const storageAccountName of storageAccounts) {
+    context.log(`Processing snapshots for storage account ${storageAccountName}`);
+    try {
+      const blobServiceClient = getBlobServiceClient(storageAccountName, credential);
+      const containers = blobServiceClient.listContainers();
+
+      for await (const container of containers) {
+        context.log(`Creating snapshots for blobs in container: ${container.name}`);
+        const containerClient = blobServiceClient.getContainerClient(container.name);
+        const blobs = containerClient.listBlobsFlat();
+
+        for await (const blob of blobs) {
+          const blobClient = containerClient.getBlobClient(blob.name);
+          context.log(`Processed blob: ${blob.name}`);
+          const blockBlobClient = blobClient.getBlockBlobClient();
+
+          // Create snapshot (if supported)
+          try {
+            const snapshotResponse = await blockBlobClient.createSnapshot();
+            context.log(`Created snapshot for blob: ${blob.name} at ${snapshotResponse.snapshot}`);
+          } catch (error) {
+            context.error(`Error creating snapshot for blob: ${blob.name}`);
+            context.error(error.message);
+          }
+        }
+      }
+    } catch (error) {
+      context.error(`Error processing storage account: ${storageAccountName}`);
+      context.error(error.message);
     }
   }
 
-  return storageAccounts;
+  context.log('Blob processing completed.');
 };
