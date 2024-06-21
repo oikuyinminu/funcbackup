@@ -11,17 +11,15 @@ const getBlobServiceClient = (storageAccountName: string, credential: ManagedIde
 };
 
 export const processStorageAccountSnapshots = async (context: InvocationContext): Promise<void> => {
-  const storageAccounts: string[] = [
-    settings.CONTENT_STORAGES,
-  ]
-    .filter(storage => storage !== "")
-    .map(storage => storage.trim().split(","))
-    .reduce((acc, val) => acc.concat(val), []);
+  const storageAccounts: string[] = settings.CONTENT_STORAGES
+    .split(",")
+    .map(storage => storage.trim())
+    .filter(storage => storage !== "");
 
   const contentIdentity = settings.CONTENT_IDENTITY;
 
   // Use the ManagedIdentityCredential with the specified client ID (user-managed identity)
-  const credential = new ManagedIdentityCredential({ clientId: contentIdentity });
+  const credential = new ManagedIdentityCredential(contentIdentity);
 
   for (const storageAccountName of storageAccounts) {
     context.log(`Processing snapshots for storage account ${storageAccountName}`);
