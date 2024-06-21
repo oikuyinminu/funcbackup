@@ -17,10 +17,11 @@ export const processStorageAccountSnapshots = async (context: InvocationContext)
     .filter(storage => storage !== "")
     .map(storage => storage.trim().split(","))
     .reduce((acc, val) => acc.concat(val), []);
-  
+
   const contentIdentity = settings.CONTENT_IDENTITY;
 
-  const credential = new ManagedIdentityCredential(contentIdentity);
+  // Use the ManagedIdentityCredential with the specified client ID (user-managed identity)
+  const credential = new ManagedIdentityCredential({ clientId: contentIdentity });
 
   for (const storageAccountName of storageAccounts) {
     context.log(`Processing snapshots for storage account ${storageAccountName}`);
