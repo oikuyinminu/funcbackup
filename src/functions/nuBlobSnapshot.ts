@@ -10,6 +10,7 @@ export async function nuBlobSnapshot(myTimer: Timer, context: InvocationContext)
 }
 
 app.timer('nuBlobSnapshot', {
-    schedule: '0 0 0 * * 5', // Runs every Friday 12.00am
+    schedule: '0 */5 * * * *', // Runs every Friday 12.00am
+    runOnStartup: true,
     handler: nuBlobSnapshot
 });
