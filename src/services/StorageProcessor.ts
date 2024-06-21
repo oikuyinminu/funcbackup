@@ -18,7 +18,9 @@ export const processStorageAccountSnapshots = async (context: InvocationContext)
     .map(storage => storage.trim().split(","))
     .reduce((acc, val) => acc.concat(val), []);
 
-  const credential = new ManagedIdentityCredential();
+
+  const managedIdentityClientId = process.env["AzureAd:StorageIdentity"];
+  const credential = new ManagedIdentityCredential(managedIdentityClientId);
 
   for (const storageAccountName of storageAccounts) {
     context.log(`Processing snapshots for storage account ${storageAccountName}`);
