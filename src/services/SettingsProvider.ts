@@ -15,8 +15,9 @@ const getValue = (key: string): string => {
   };
   
   const AD_TENANT_ID: string = getValue("AzureAd:TenantId");
-  const CONTENT_STORAGES: string = getValue("AzureAd:ContentStorages");
-  const CONTENT_IDENTITY: string = getValue("AzureAd:StorageIdentity");
+  
+  const CONTENT_STORAGES: string = getValue("AzureAd:ContentStorages")
+  const CONTENT_IDENTITY: string = getValue("AzureAd:StorageIdentity")
   
   
   export {
