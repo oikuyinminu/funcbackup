@@ -11,6 +11,5 @@ export async function nuBlobSnapshot(myTimer: Timer, context: InvocationContext)
 
 app.timer('nuBlobSnapshot', {
     schedule: '0 * * * * 5',
-    handler: nuBlobSnapshot,
-    runOnStartup: true
+    handler: nuBlobSnapshot
 });
